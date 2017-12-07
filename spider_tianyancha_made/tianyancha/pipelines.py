@@ -23,8 +23,8 @@ class TianyanchaPipeline(object):
         i = item['update_item']
 
         try:
-            spider.mongo_db.made.update_one({'company_name': i['company_name']}, {'$set': {'check': i['check'], 'status': 1}})
-
-            spider.log('update mongo succed!  company_name=%s' % (i['company_name']), level=log.INFO)
+            ## 第一次需求 匹配公司是否存在
+            spider.mongo_db.made.update_one({'company_name': i['company_name']}, {'$set': {'check': i['check'], 'cp_status': i['cp_status'], 'status': 1}})
+            spider.log('update mongo succed!  company_name=%s, check=%s, cp_status=%s' % (i['company_name'], i['check'], i['cp_status']), level=log.INFO)
         except Exception, e:
             spider.log('update mongo failed! company_name=%s (%s)' % (i['company_name'], str(e)), level=log.ERROR)

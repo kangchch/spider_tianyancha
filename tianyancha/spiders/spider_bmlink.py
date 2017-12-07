@@ -46,7 +46,6 @@ class TianyanchaSpider(scrapy.Spider):
 
         try:
             tyc_url = 'https://m.tianyancha.com/search?key='
-            # tyc_url = 'https://www.tianyancha.com/search?key='
             records = self.mongo_db.bmlink.find({'status':0}, {'company_name': 1})
             for record in records:
                 company_name = record['company_name']
@@ -56,10 +55,11 @@ class TianyanchaSpider(scrapy.Spider):
                 yield scrapy.Request(url = company_url, meta = meta, callback = self.parse, dont_filter = True)
             # company_name = u'山东省临沂市斯利可桐木制品厂'
             # # company_name = u'重庆金联陶瓷有限公司'
+            # company_name = u'河北大城祥龙古典家具有限公司'
             # company_name = company_name.decode('utf-8')
             # company_url = ''.join(['https://www.tianyancha.com/search?key=', company_name, '&checkFrom=searchBox'])
             # print company_url
-            # meta = {'dont_redirect': True, 'company_name': company_name, 'dont_retry': True}
+            # meta = {'dont_redirect': True, 'company_name': company_name, 'company_url': company_url, 'dont_retry': True}
             # self.log('spider new url=%s' % (company_url), level=log.INFO)
             # yield scrapy.Request(url = company_url, meta = meta, callback = self.parse, dont_filter = True)
         except:
@@ -80,20 +80,20 @@ class TianyanchaSpider(scrapy.Spider):
             self.log('fetch failed ! status = %d, company_url=%s' % (response.status, company_url), level = log.WARNING)
 
         ## m 站xpath
-        tyc_company_name = sel.xpath("//div[@class='new-border-bottom pt5 pb5 ml15 mr15'][1]//a[@class='query_name in-block']/span/em/text()").extract()
-        # tyc_company_name = sel.xpath("//div[@class='search_result_single search-2017 pb25 pt25 pl30 pr30'][1]//\
-                # a[@class='query_name sv-search-company f18 in-block vertical-middle']/span/em/text()").extract()
+        tyc_company_name = sel.xpath("//div[@class='new-border-bottom pt5 pb5 ml15 mr15'][1]//a[@class='query_name in-block']/span//text()").extract()
+        tyc_company_status = sel.xpath("//div[@class='title'][3]/span/text()").extract()
+        tyc = ''.join(tyc_company_name)
+        tyc = tyc.strip()
+        print tyc
 
-        if tyc_company_name:
-            tyc = tyc_company_name[0].strip()
-            if tyc == i['company_name']:
-                i['check'] = u"已核实"
-            else:
-                i['check'] = u"没找到"
+        if tyc == i['company_name']:
+            i['check'] = u"已核实"
+            i['cp_status'] = tyc_company_status[0].strip()
         else:
             i['check'] = u"没找到"
+            i['cp_status'] = ''
 
-        self.log('check done! company_name=%s, check=%s' % (i['company_name'], i['check']), level=log.INFO)
+        self.log('check done! company_name=%s, check=%s, cp_status=%s' % (i['company_name'], i['check'], i['cp_status']), level=log.INFO)
         yield ret_item
 
 

@@ -23,7 +23,7 @@ class TianyanchaPipeline(object):
         i = item['update_item']
 
         try:
-            spider.mongo_db.bmlink.update_one({'company_name': i['company_name']}, {'$set': {'check': i['check'], 'status': 1}})
+            spider.mongo_db.bmlink.update_one({'company_name': i['company_name']}, {'$set': {'check': i['check'], 'cp_status': i['cp_status'], 'status': 1}})
 
             spider.log('update mongo succed!  company_name=%s' % (i['company_name']), level=log.INFO)
         except Exception, e:
